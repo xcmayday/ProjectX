@@ -11,7 +11,7 @@
 #include "RPGType.h"
 #include "RPGCharacterBase.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ARPGCharacterBase*, Character);
 class URPGGameplayAbility;
 
 UCLASS()
@@ -71,6 +71,15 @@ protected:
 	/** Fills in with ability specs, based on defaults and inventory */
 	void FillSlottedAbilitySpecs(TMap<FRPGItemSlot, FGameplayAbilitySpec>& SlottedAbilitySpecs);
 
+	// Initialize the Character's attributes. Must run on Server but we run it on Client too
+	// so that we don't have to wait. The Server's replication to the Client won't matter since
+	// the values should be the same.
+	virtual void InitializeAttributes();
+
+	// Client only
+	virtual void OnRep_PlayerState() override;
+	virtual void OnRep_Controller() override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -104,7 +113,10 @@ protected:
 	/** Map of slot to ability granted by that slot. I may refactor this later */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 		TMap<FRPGItemSlot, FGameplayAbilitySpecHandle> SlottedAbilities;
-
+	// Default attributes for a character for initializing on spawn/respawn.
+// This is an instant GE that overrides the values for attributes that get reset on spawn/respawn.
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "RPG|Abilities")
+		TSubclassOf<class UGameplayEffect> DefaultAttributes;
 
 	FDelegateHandle InventoryUpdateHandle;
 	FDelegateHandle InventoryLoadedHandle;

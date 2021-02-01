@@ -4,6 +4,8 @@
 #include "ProjectX/Public/ActionRPG/RPGCharacterBase.h"
 #include "AbilitySystemGlobals.h"
 #include "ProjectX/Public/ActionRPG/Abilities/RPGGameplayAbility.h"
+#include "ActionRPG/RPGPlayerStateBase.h"
+#include "ActionRPG/RPGPlayerControllerBase.h"
 
 
 // Sets default values
@@ -12,11 +14,11 @@ ARPGCharacterBase::ARPGCharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	AbilitySystemComponent = CreateDefaultSubobject<URPGAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-	AbilitySystemComponent->SetIsReplicated(true);
+	//AbilitySystemComponent = CreateDefaultSubobject<URPGAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	//AbilitySystemComponent->SetIsReplicated(true);
 
 	// Create the attribute set, this replicates by default
-	AttributeSet=CreateDefaultSubobject<URPGAttributeSet>(TEXT("AttributeSet"));
+	//AttributeSet=CreateDefaultSubobject<URPGAttributeSet>(TEXT("AttributeSet"));
 
 	CharacterLevel = 1;
 
@@ -32,17 +34,40 @@ ARPGCharacterBase::ARPGCharacterBase()
 void ARPGCharacterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+	//cancel character in ABS;
+	//if (AbilitySystemComponent)
+	//{
+	//	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	//	AddStartupGameplayAbilities();
+	//}
 
-	if (AbilitySystemComponent)
+	//Use PS is ABS
+	UE_LOG(LogTemp, Warning, TEXT("%s "), *FString(__FUNCTION__));
+	
+	ARPGPlayerStateBase* PS = GetPlayerState<ARPGPlayerStateBase>();
+	if (PS)
 	{
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+		AbilitySystemComponent =Cast<URPGAbilitySystemComponent>(PS->GetAbilitySystemComponent()) ;
+		PS->GetAbilitySystemComponent()->InitAbilityActorInfo(PS, this);
 		AddStartupGameplayAbilities();
+
+		AttributeSet = PS->GetAttributeSetBase();
+
+		InitializeAttributes();
+		ARPGPlayerControllerBase* PC = Cast<ARPGPlayerControllerBase>(GetController());
+		if (PC)
+		{
+			PC->CreateHUD();
+		}
 	}
+
+	
 }
 
 void ARPGCharacterBase::UnPossessed()
 {
 	Super::UnPossessed();
+	UE_LOG(LogTemp, Warning, TEXT("%s "), *FString(__FUNCTION__));
 }
 
 UAbilitySystemComponent* ARPGCharacterBase::GetAbilitySystemComponent() const
@@ -162,6 +187,56 @@ void ARPGCharacterBase::FillSlottedAbilitySpecs(TMap<FRPGItemSlot, FGameplayAbil
 			
 		}
 	}
+}
+
+void ARPGCharacterBase::InitializeAttributes()
+{
+	if (!IsValid(AbilitySystemComponent))
+	{
+		return;
+	}
+
+	if (!DefaultAttributes)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s() Missing DefaultAttributes for %s. Please fill in the character's Blueprint."), *FString(__FUNCTION__), *GetName());
+		return;
+	}
+
+	// Can run on Server and Client
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributes, GetCharacterLevel(), EffectContext);
+	if (NewHandle.IsValid())
+	{
+		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
+	}
+}
+
+void ARPGCharacterBase::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	UE_LOG(LogTemp, Warning, TEXT("%s "), *FString(__FUNCTION__));
+	ARPGPlayerStateBase* PS = GetPlayerState<ARPGPlayerStateBase>();
+	if (PS)
+	{
+		AbilitySystemComponent = Cast<URPGAbilitySystemComponent>(PS->GetAbilitySystemComponent());
+		AbilitySystemComponent->InitAbilityActorInfo(PS, this);
+
+		AttributeSet = PS->GetAttributeSetBase();
+		InitializeAttributes();
+
+		ARPGPlayerControllerBase* PC = Cast<ARPGPlayerControllerBase>(GetController());
+		if (PC)
+		{
+			PC->CreateHUD();
+		}
+	}
+}
+
+void ARPGCharacterBase::OnRep_Controller()
+{
+
 }
 
 // Called every frame

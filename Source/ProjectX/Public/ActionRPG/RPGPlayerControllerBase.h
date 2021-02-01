@@ -17,5 +17,29 @@ class PROJECTX_API ARPGPlayerControllerBase : public APlayerController
 public:
 	ARPGPlayerControllerBase(){}
 	virtual void BeginPlay()override;
+
+	void CreateHUD();
+
+	class URPGUserWidget* GetGSHUD();
+
+protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GASShooter|UI")
+		TSubclassOf<class URPGUserWidget> UIHUDWidgetClass;
+
+	UPROPERTY(BlueprintReadWrite, Category = "GASShooter|UI")
+		class URPGUserWidget* UIHUDWidget;
+
+	// Server only
+	virtual void OnPossess(APawn* InPawn) override;
+
+	virtual void OnRep_PlayerState() override;
+
+
+	UFUNCTION(Exec)
+		void Kill();
+
+	UFUNCTION(Server, Reliable)
+	void ServerKill();
+	bool ServerKill_Validate();
 	
 };

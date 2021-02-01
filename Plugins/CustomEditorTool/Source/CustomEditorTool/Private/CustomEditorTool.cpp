@@ -126,20 +126,24 @@ void FCustomEditorToolModule::RegisterMenus()
 	}
 
 	{
-		UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar");
+		//×¢ÊÍµôsetting ÏÂbutton
+	/*	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar");
 		{
 			FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("Settings");
 			{
 				FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FCustomEditorToolCommands::Get().PluginAction));
 				Entry.SetCommandList(PluginCommands);
 			}
-		}
+		}*/
 	}
 	{
-		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar");
-		FToolMenuSection& Section = Menu->FindOrAddSection("Misc");
-		FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FCustomEditorToolCommands::Get().PluginAction));
-		Entry.SetCommandList(PluginCommands);
+		//×¢ÊÍµôLevel Button
+	/*	{
+			UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar");
+			FToolMenuSection& Section = Menu->FindOrAddSection("Misc");
+			FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FCustomEditorToolCommands::Get().PluginAction));
+			Entry.SetCommandList(PluginCommands);
+		}*/
 	}
 	{
 		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.OpenBlueprint");
