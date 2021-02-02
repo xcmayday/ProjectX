@@ -80,6 +80,9 @@ protected:
 	virtual void OnRep_PlayerState() override;
 	virtual void OnRep_Controller() override;
 
+	UFUNCTION()
+		void InitializeFloatingStatusBar();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -117,6 +120,16 @@ protected:
 // This is an instant GE that overrides the values for attributes that get reset on spawn/respawn.
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "RPG|Abilities")
 		TSubclassOf<class UGameplayEffect> DefaultAttributes;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "RPG|UI")
+		TSubclassOf<class URPGFloatingStatusBarWidget> UIFloatingStatusBarClass;
+
+	UPROPERTY()
+		class URPGFloatingStatusBarWidget* UIFloatingStatusBar;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "RPG|UI")
+		class UWidgetComponent* UIFloatingStatusBarComponent;
+
+
 
 	FDelegateHandle InventoryUpdateHandle;
 	FDelegateHandle InventoryLoadedHandle;

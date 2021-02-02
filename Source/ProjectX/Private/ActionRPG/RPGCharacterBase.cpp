@@ -6,6 +6,9 @@
 #include "ProjectX/Public/ActionRPG/Abilities/RPGGameplayAbility.h"
 #include "ActionRPG/RPGPlayerStateBase.h"
 #include "ActionRPG/RPGPlayerControllerBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "ActionRPG/RPGFloatingStatusBarWidget.h"
+#include "Runtime\UMG\Public\Components\WidgetComponent.h"
 
 
 // Sets default values
@@ -23,6 +26,18 @@ ARPGCharacterBase::ARPGCharacterBase()
 	CharacterLevel = 1;
 
 	bAbilitiesInitialized = false;
+
+	UIFloatingStatusBarComponent = CreateDefaultSubobject<UWidgetComponent>(FName("UIFloatingStatusBarComponent"));
+	UIFloatingStatusBarComponent->SetupAttachment(RootComponent);
+	UIFloatingStatusBarComponent->SetRelativeLocation(FVector(0, 0, 120));
+	UIFloatingStatusBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	UIFloatingStatusBarComponent->SetDrawSize(FVector2D(500, 500));
+
+	UIFloatingStatusBarClass = StaticLoadClass(UObject::StaticClass(), nullptr, TEXT("/Game/ActionRPG/BP/UI/WBP_FloatingStatusBar_Hero.WBP_FloatingStatusBar_Hero_C"));
+	if (!UIFloatingStatusBarClass)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s() Failed to find UIFloatingStatusBarClass. If it was moved, please update the reference location in C++."), *FString(__FUNCTION__));
+	}
 	
 
 	
@@ -59,6 +74,7 @@ void ARPGCharacterBase::PossessedBy(AController* NewController)
 		{
 			PC->CreateHUD();
 		}
+		InitializeFloatingStatusBar();
 	}
 
 	
@@ -231,12 +247,56 @@ void ARPGCharacterBase::OnRep_PlayerState()
 		{
 			PC->CreateHUD();
 		}
+		InitializeAttributes();
 	}
 }
 
 void ARPGCharacterBase::OnRep_Controller()
 {
 
+}
+
+void ARPGCharacterBase::InitializeFloatingStatusBar()
+{
+	// Only create once
+	if (UIFloatingStatusBar || !IsValid(AbilitySystemComponent))
+	{
+		return;
+	}
+
+	// Don't create for locally controlled player. We could add a game setting to toggle this later.
+	if (IsPlayerControlled() && IsLocallyControlled())
+	{
+		return;
+	}
+
+	// Need a valid PlayerState
+	if (!GetPlayerState())
+	{
+		return;
+	}
+
+	// Setup UI for Locally Owned Players only, not AI or the server's copy of the PlayerControllers
+	ARPGPlayerControllerBase* PC = Cast<ARPGPlayerControllerBase>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (PC && PC->IsLocalPlayerController())
+	{
+		if (UIFloatingStatusBarClass)
+		{
+			UIFloatingStatusBar = CreateWidget<URPGFloatingStatusBarWidget>(PC, UIFloatingStatusBarClass);
+			if (UIFloatingStatusBar && UIFloatingStatusBarComponent)
+			{
+				UIFloatingStatusBarComponent->SetWidget(UIFloatingStatusBar);
+				
+
+				// Setup the floating status bar
+				UIFloatingStatusBar->SetHealthPercentage(GetHealth() / GetMaxHealth());
+				UIFloatingStatusBar->SetManaPercentage(GetMana() / GetMaxMana());
+				//UIFloatingStatusBar->SetShieldPercentage(GetShield() / GetMaxShield());
+				UIFloatingStatusBar->OwningCharacter = this;
+				//UIFloatingStatusBar->SetCharacterName(CharacterName);
+			}
+		}
+	}
 }
 
 // Called every frame
