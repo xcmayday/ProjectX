@@ -24,7 +24,5 @@ public:
 
 	/** Version of function in AbilitySystemGlobals that returns correct type */
 	static URPGAbilitySystemComponent* GetAbilitySystemComponentFromActor(const AActor* Actor, bool LookForComponent = false);
-
-	virtual void AbilityLocalInputPressed(int32 InputID) override;
 	
 };

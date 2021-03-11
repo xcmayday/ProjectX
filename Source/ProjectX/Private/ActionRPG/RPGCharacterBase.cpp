@@ -187,8 +187,6 @@ void ARPGCharacterBase::AddSlottedGameplayAbilities()
 		if (!SpecHandle.IsValid())
 		{
 			SpecHandle = AbilitySystemComponent->GiveAbility(SpecPair.Value);
-			URPGGameplayAbility* mAbility = Cast<URPGGameplayAbility>(SpecPair.Value.Ability);
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(mAbility, 1, static_cast<int32>(mAbility->AbilityInputID)));
 		}
 	}
 
