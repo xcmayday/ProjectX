@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
 #include "RPGAbilityTypes.h"
+#include "../ProjectX.h"
 #include "RPGGameplayAbility.generated.h"
 
 /**
@@ -16,6 +17,15 @@ class PROJECTX_API URPGGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 public:
 	URPGGameplayAbility();
+
+	// Abilities with this set will automatically activate when the input is pressed
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ability")
+		EProjectXAbilityInputID AbilityInputID = EProjectXAbilityInputID::None;
+
+	// If true, this ability will activate when its bound input is pressed. Disable if you want to bind an ability to an
+// input but not have it activate when pressed.
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Ability")
+		bool bActivateOnInput;
 
 	/** Map of gameplay tags to gameplay effect containers */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = GameplayEffects)

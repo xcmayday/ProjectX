@@ -14,17 +14,17 @@ enum class EProjectXAbilityInputID : uint8
 	// 0 None
 	None				UMETA(DisplayName = "None"),
 	// 1 Confirm
-	Confirm				UMETA(DisplayName = "Confirm"),
+	NormalAttack				UMETA(DisplayName = "NormalAttack"),
 	// 2 Cancel
-	Cancel				UMETA(DisplayName = "Cancel"),
+	SpecialAttack				UMETA(DisplayName = "SpecialAttack"),
 	// 3 Sprint
-	Sprint				UMETA(DisplayName = "Sprint"),
+	Roll				UMETA(DisplayName = "Roll"),
 	// 4 Jump
-	Jump				UMETA(DisplayName = "Jump"),
+	ChangeWeapon				UMETA(DisplayName = "ChangeWeapon"),
 	// 5 PrimaryFire
-	PrimaryFire			UMETA(DisplayName = "Primary Fire"),
+	Inventory			UMETA(DisplayName = "Inventory"),
 	// 6 SecondaryFire
-	SecondaryFire		UMETA(DisplayName = "Secondary Fire"),
+	Run						UMETA(DisplayName = "Run"),
 	// 7 Alternate Fire
 	AlternateFire		UMETA(DisplayName = "Alternate Fire"),
 	// 8 Reload
